@@ -60,7 +60,6 @@ void orientationUpdate()
   //I have the pitch and roll now. I am invincible.
 }
 
-
 void get_imu()
 {
   //k so lets read the mpu first. 
@@ -88,7 +87,22 @@ void get_imu()
       lastG[i]=G[i]; 
     }   //243us in this function.
     //-----EXTRACTION OF ACCEL-GYRO DATA ENDS-----
-    orientationUpdate();   //~240us function   
+    orientationUpdate();   //~240us function
+    //I solved this a long time ago for implementing altitude hold in my quadcopter. I m not sure where i kept the 
+    //derivation so you'll just have to trust me. 
+    float tanSqTheta = 0.0003045*(T[0]*T[0] + T[1]*T[1]); //35us. quick math.
+    float cosSqTheta = 1 - tanSqTheta + (tanSqTheta*tanSqTheta); //20us . quick math.
+    float cosTheta = sqrt(cosSqTheta);//30us
+    //Theta is the angle made by the Z axis of the mpu with the vertical. Az*cos(theta) = actual vertical acceleration. 
+    if(A[2]<1) //implementing these if conditions because the Accelgyro has an asymetric range of measurement.
+    {           //the nominal value of Az is at 10 not 0. Therefore the max value of Az that can be measured is 20 while 
+      A[2] = 1;  //the min value is -20. The downward gap is more than the upward gap. This becomes problematic on systems
+    }         // where you have a lot of vibrations.
+    if(A[2]>19)
+    {
+      A[2] = 19;
+    }
+    az = A[2]*cosTheta - 9.8*cosSqTheta; // 20us. Trust me, this is the final formula. I ll change it if i figure its wrong.
+                                          //For now, deal with it.
   }
-  az=(double) -(aaWorld.z * 9.8)/16384;
 }
