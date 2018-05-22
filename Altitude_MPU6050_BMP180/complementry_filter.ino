@@ -50,10 +50,16 @@ void complementry_filter()
   h_est_acc= 0.05*h_est_acc + 0.95*prev_h_est_acc;                              //LOW pass filter
   prev_h_est_acc=h_est_acc;
   
-  /*look, I already used up Accel_SD. so lemme use
+  /*look, I already used up Accel_SD. so lemme use the spiky boy I introduced in the imu.ino
+    beta is given as 0.95 so i already got half the stuff covered.
+    however, this spiky boi has a slightly more spiky behaviour.
+    here, see for yoself - http://www.wolframalpha.com/input/?i=0.05%2F(1%2B%7Cx%7C%5E0.5)
+    let the trust factor be lawda_lehsun
+    lawda_lehsun = 0.05/(1+sqrt(baro_SD)) 
   */
+  float lawda_lehsun = 0.05/(1+sqrt(baro_SD)); 
   
-  h_est=(double) beta*(h_est_acc) + (1-beta)*(h_est_baro);                                            //complemntry filter
+  h_est=(double) (1-lawda_lehsun)*(h_est_acc) + lawda_lehsun*(h_est_baro);  //complemntry filter
   prev_h_est=(double)h_est;
 
   
