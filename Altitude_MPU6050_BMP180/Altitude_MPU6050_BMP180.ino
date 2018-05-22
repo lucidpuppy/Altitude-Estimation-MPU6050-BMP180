@@ -25,6 +25,7 @@ int16_t g[3];  //gyration rates from mpu6050
 float A[3],G[3],lastA[3]={0,0,0},lastG[3]={0,0,0};
 float offsetA[3] = {60,-29,24},offsetG[3] = {947,-1703,1599};//offset values taken from IMU.ino(original) 
 float T[2]; //x=0,y=1,z=2, T=tilt.
+float bias[2] ={0,0}; //biases for the psuedo Kalman. These biases are in degrees not degrees/s. You'll see what i mean. 
 //We're doing this my way. Why? because The DMP uses the same kalman that you were using, which means it has the same flaw that
 //the normal kalman has. Except I'm not gonna be using a Kalman here. I'll be using a psuedo Kalman(Yes I made that up on the spot).
 
