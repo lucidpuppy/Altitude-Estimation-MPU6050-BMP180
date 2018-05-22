@@ -1,7 +1,20 @@
 void complementry_filter()
 {
-  h_est_baro = barometer.GetAltitude(seaLevelPressure)-alt_reference;
+  float H[3],baro_SD=0;
+  for(int i = 0;i<3;i++)
+  {
+    H[i] = barometer.GetAltitude(seaLevelPressure)-alt_reference;
+    h_est_baro += H[i];
+  }
+  h_est_baro/=3; // mean
+  //Standard deviation (aka error for us) 
+  for(i = 0;i<3;i++)
+  {
+    baro_SD += pow((H[i] - h_est_baro),2);
+  }
+  baro_SD = sqrt(baro_SD/2)/h_est_baro); //get SD in fractions
   h_est_baro=  0.05* h_est_baro +  0.95*prev_h_est_baro;                                            //LOW pass filter
+  //now we have the height estimate and it's standard deviation.
   
   get_imu();
   az= 0.05 * az + 0.95 *az_prev;                                                                    //LOW pass filter
