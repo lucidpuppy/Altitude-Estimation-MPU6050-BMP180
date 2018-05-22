@@ -27,10 +27,6 @@ void setup_imu()                                                                
   T[1]=(-57.3*asin(A[0]*0.102));
 }
 
-inline __attribute__((always_inline)) float my_asin(float a)//works pretty damn well for a large range of angles.
-{
-  return a*(1+(0.5*a*a)); //35us
-}
 
 void orientationUpdate()    
 {
