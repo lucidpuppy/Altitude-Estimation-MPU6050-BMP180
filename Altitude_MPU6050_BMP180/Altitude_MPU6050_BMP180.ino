@@ -14,31 +14,20 @@ bool reference=false;
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
+
+//going old school baabyy!-----
 MPU6050 mpu;
-
 int i=200;
-
 #define LED_PIN 13                                                            // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 bool blinkState = false;
+int16_t a[3];  //accelerations from mpu6050
+int16_t g[3];  //gyration rates from mpu6050
+float A[3],G[3],lastA[3]={0,0,0},lastG[3]={0,0,0};
+float offsetA[3] = {60,-29,24},offsetG[3] = {947,-1703,1599};//offset values taken from IMU.ino(original) 
+float T[2]; //x=0,y=1,z=2, T=tilt.
+//We're doing this my way. Why? because The DMP uses the same kalman that you were using, which means it has the same flaw that
+//the normal kalman has. Except I'm not gonna be using a Kalman here. I'll be using a psuedo Kalman(Yes I made that up on the spot).
 
-bool dmpReady = false;                                                        // set true if DMP init was successful
-uint8_t mpuIntStatus;                                                         // holds actual interrupt status byte from MPU
-uint8_t devStatus;                                                            // return status after each device operation (0 = success, !0 = error)
-uint16_t packetSize;                                                          // expected DMP packet size (default is 42 bytes)
-uint16_t fifoCount;                                                           // count of all bytes currently in FIFO
-uint8_t fifoBuffer[64];                                                       // FIFO storage buffer
-
-Quaternion q;                                                                 // [w, x, y, z]         quaternion container
-VectorInt16 aa;                                                               // [x, y, z]            accel sensor measurements
-VectorInt16 aaReal;                                                           // [x, y, z]            gravity-free accel sensor measurements
-VectorInt16 aaWorld;                                                          // [x, y, z]            world-frame accel sensor measurements
-VectorFloat gravity;                                                          // [x, y, z]            gravity vector
-float euler[3];                                                               // [psi, theta, phi]    Euler angle container
-float ypr[3];                                                                 // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
-
-
-volatile bool mpuInterrupt = false;                                         // indicates whether MPU interrupt pin has gone high
-void dmpDataReady() {mpuInterrupt = true;}
 double az,az_prev;                                                        //Kalman filter stuff..right on it.
 double vz_est_acc,h_est_acc;
 double prev_vz_est_acc,prev_h_est_acc;
@@ -50,7 +39,7 @@ double dt;
 void setup()
 {
   Wire.begin();
-  TWBR = 12;
+  Wire.setClock(800000);//why? because portability matters. Also because max speed boi.
   Serial.begin(250000);
   initialize_stuff();
   while(i!=0) { get_imu(); get_bmp(); i--; Serial.print("\nCalibrating");}
