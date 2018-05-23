@@ -13,7 +13,7 @@ void setup_bmp()
     barometer.SoftReset();
     barometer.Initialize();
   }
-  else Serial.println("No sensor found.");
+  else Serial.println("Nagar Palika ko bulao.");
 }
 /*
 void running_avg()
